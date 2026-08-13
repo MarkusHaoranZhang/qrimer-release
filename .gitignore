@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# pytest
+.pytest_cache/
+.ruff_cache/
+
+# Generated outputs (reproducible via experiment scripts)
+outputs/figures/*.pdf
+outputs/logs/*.npz
+outputs/tables/*
+
+# OS
+Thumbs.db
+.DS_Store
