@@ -5,8 +5,8 @@ Reference: Section 6.1 (Implementation details) of the paper.
 """
 
 # Qiskit simulation parameters
-# Paper states Qiskit 0.45 for the original experiments; this codebase
-# uses Qiskit 2.x which provides the same statevector simulation behaviour.
+# The paper states Qiskit 2.x (Section 6.1); this codebase uses the
+# same version.
 QISKIT_VERSION = "2.x"
 SHOTS = 10**4
 PHASE_ESTIMATION_BITS = 10

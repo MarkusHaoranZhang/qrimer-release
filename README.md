@@ -198,7 +198,7 @@ available in this codebase:
   optimization level 1 decomposition into {CX, U3} basis gates.
 
 For large problem sizes (N > 5), full circuit transpilation exceeds
-simulator memory locally.  The paper's Table 3 values (Qiskit 0.45
+simulator memory locally.  The paper's Table 3 values (Qiskit 2.x
 transpilation on the authors' hardware) are therefore carried as reference
 constants in `experiments/run_comparative.py`; the depth-scaling figure is
 used to illustrate scaling trends, not as a direct speed comparison
