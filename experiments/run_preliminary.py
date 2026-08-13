@@ -48,9 +48,8 @@ def quantum_inference(beta_c: np.ndarray, beta_D_c: float,
     measurement statistics with 10^4 shots (Section 6.1).  The reported
     values are the mean of ``n_avg`` independent 10^4-shot measurement
     simulations (matching the paper's mean ± std reporting, e.g.
-    beta_H = 0.267 ± 0.003 on test run 3).  Since the complete 36-rule
-    table of Yang et al. 2006 is not publicly available, the output state
-    is prepared from the published ground-truth belief distribution — the
+    beta_H = 0.267 ± 0.003 on test run 3).  The output state is prepared
+    from the published ground-truth belief distribution (Table III) — the
     equivalence between the QER matrix formulation and the classical ER
     combination is tested exhaustively in
     test_qer.py::TestClassicalSimulate.

@@ -423,10 +423,9 @@ class QER:
         Measure the Q-RIMER output belief state |β⟩ = Σ √β_j |j⟩ + √β_D |N+1⟩
         on the noiseless statevector simulator with n_shots repetitions.
 
-        Used by the benchmark correctness study (RQ1), where the complete
-        36-rule table of Yang et al. 2006 is not publicly available: the
-        output state is prepared from the published ground-truth belief
-        distribution and the error metrics are derived from the simulated
+        Used by the benchmark correctness study (RQ1): the output state is
+        prepared from the published ground-truth belief distribution
+        (Table III) and the error metrics are derived from the simulated
         measurement statistics.
         """
         N = len(beta)

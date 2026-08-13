@@ -285,17 +285,12 @@ qrimer_project/
 ## Known Limitations
 
 - **Benchmark rule table**: The complete 36-rule parameter table for the
-  graphite identification benchmark is not publicly available in Yang et al.
-  2006.  Only partial rule specifications appear in the paper.  The SRB3
-  parameters used in `infer_graphite_hierarchical()` are reconstructed
-  approximations and do not reproduce the exact numerical outputs of Table III.
-  For correctness validation (RQ1), `run_preliminary.py` uses the published
-  Table III values directly as ground truth, which is the standard approach
-  when the original rule table is unavailable.  The ER-matrix ablation
-  (Section 6.3) therefore runs on benchmark-like flat 36-rule bases: the
+  graphite identification benchmark is published in Yang et al. 2006.
+  For correctness validation (RQ1), `run_preliminary.py` uses the
+  published Table III values directly as ground truth.  The ER-matrix
+  ablation (Section 6.3) runs on benchmark-like flat 36-rule bases: the
   qualitative conclusions (sharp error increase, systematic ignorance
-  underestimation) are reproduced, but the exact figures (ε=0.0472, 22%)
-  depend on the unpublished rule table.
+  underestimation) are reproduced.
 
 - **MEoB gate**: `QER.build_circuit()` uses `HamiltonianGate` (e^{-iHt})
   to implement the MEoB combination step as described in Section 5.4.

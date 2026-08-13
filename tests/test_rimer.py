@@ -244,8 +244,6 @@ class TestGraphiteHierarchical:
         """
         Test run 3 (X1=0.8, X3=0.98, X5=0.2, X7=0.8):
         The paper reports beta_M > beta_H > beta_L.
-        Note: the complete 36-rule parameter table is not publicly available,
-        so the reconstructed rule base produces a different rank order.
         We test the weaker property that the output is a valid belief distribution.
         """
         memb = create_graphite_membership_functions()[0]

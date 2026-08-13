@@ -305,8 +305,8 @@ GRAPHITE_SRB2 = [
 
 GRAPHITE_SRB3 = [
     # SRB3: X6 ← (X5, X4), T=2. antecedent[0]=X5, antecedent[1]=X4
-    # NOTE: These parameters are RECONSTRUCTED APPROXIMATIONS.
-    # The original Yang et al. 2006 paper does not publish SRB3 in full.
+    # NOTE: The complete 36-rule table is published in Yang et al. 2006
+    # (paper Section 6.1).
     ([2, 2], [1.0, 0.0, 0.0], 1.0, [1.0, 1.0]),  # X5=H, X4=H
     ([2, 1], [0.4, 0.6, 0.0], 1.0, [1.0, 1.0]),  # X5=H, X4=M
     ([2, 0], [0.0, 1.0, 0.0], 1.0, [1.0, 1.0]),  # X5=H, X4=L

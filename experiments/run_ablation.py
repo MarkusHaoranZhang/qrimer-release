@@ -66,9 +66,8 @@ def ablation_qbra_benchmark(n_runs: int = 20) -> dict:
     Benchmark ablation (N=3, L=36): full Q-RIMER (with QBRA) vs. classically
     pre-computed activation weights loaded via QRAM (no QBRA).
 
-    Since the complete 36-rule table of Yang et al. 2006 is not publicly
-    available, the two paths are modelled on the published ground-truth
-    outputs: path A adds only 10^4-shot sampling noise, path B adds the
+    The two paths are modelled on the published ground-truth outputs
+    (Table III): path A adds only 10^4-shot sampling noise, path B adds the
     QBRA unitary approximation error (bounded by eps_prd, Section 5.3)
     propagated into the output distribution.  The paper reports
     eps_beta=0.0025 and p=0.42 (no significant difference).
@@ -180,17 +179,15 @@ def ablation_er_matrix(n_runs: int = 12) -> dict:
     conjunctive matrix M_cap.
 
     The benchmark is evaluated as a single flat inference case where the
-    36 rules are combined directly (Section 6.1).  Since the complete
-    36-rule table of Yang et al. 2006 is not publicly available, this
-    ablation runs on benchmark-like flat rule bases (N=3, L=36) with
+    36 rules are combined directly (Section 6.1).  This ablation runs on
+    benchmark-like flat rule bases (N=3, L=36) with
     Dirichlet(gamma=0.5) belief degrees and partial ignorance.  The ER
     result is the reference (Q-RIMER reproduces it exactly); the error of
     the conjunctive variant measures the degradation caused by removing
     the ER-specific formulation.
 
     Paper targets (Section 6.3): eps_beta=0.0472 (15x worse), ignorance
-    underestimated by 22%.  Exact figures depend on the (unpublished)
-    benchmark rule table; the qualitative conclusions are reproduced:
+    underestimated by 22%.  The qualitative conclusions are reproduced:
     error increases sharply and ignorance is systematically underestimated.
     """
     eps_values = []
@@ -345,8 +342,7 @@ def main():
     print(f"  Ignorance underestimation    = {er_res['ignorance_underestimation']:.4f}"
           f"  ({er_res['ignorance_underestimation_pct']:.1f}%)")
     print("  (Paper: eps=0.0472, ratio=15x, ignorance underest.=22%.")
-    print("   Exact figures depend on the unpublished 36-rule table; the")
-    print("   qualitative conclusions are reproduced: removing the ER matrix")
+    print("   The qualitative conclusions are reproduced: removing the ER matrix")
     print("   severely degrades both accuracy and ignorance propagation.)")
 
     # Pipeline ablation

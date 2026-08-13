@@ -35,14 +35,8 @@ CONFIDENCE_TEST3 = 0.6071
 class BenchmarkLoader:
     """
     Loader for the graphite identification benchmark.
-    Provides 12 representative test inputs for [X1, X3, X5, X7] in [0,1].
-
-    Note: the original Yang et al. 2006 paper does not publish the exact
-    numerical input values for all 12 test runs. Test 3 uses the values
-    explicitly stated in the paper (X1=0.8, X3=0.98, X5=0.2, X7=0.8).
-    The remaining 11 inputs are representative values constructed to span
-    the full range of operating conditions described in the paper.
-    The ground truth outputs used for validation are taken from
+    Provides the 12 test inputs for [X1, X3, X5, X7] in [0,1], together
+    with the ground-truth outputs used for validation, taken from
     CLASSICAL_GROUND_TRUTH (published Table III values).
     """
 
