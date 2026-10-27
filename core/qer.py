@@ -3,20 +3,21 @@ Quantum Evidential Reasoning (QER) Engine.
 Implements Section 5.4: polynomial speedup via Hermitian matrix MEoB.
 Compatible with Qiskit >= 1.0.
 
-Two execution modes
--------------------
+Execution paths
+----------------
 classical_simulate (default)
     Runs the ER combination classically using the exact matrix formulation
-    derived in the paper.  This is the correct path for validation on a
-    simulator: it reproduces the paper's results exactly and is used by
-    run_preliminary.py.
+    derived in the paper.  This is the reference path used for validation.
 
-circuit_mode
-    Builds the Qiskit quantum circuit (StatePreparation + MEoB gate structure)
-    for depth analysis and future deployment on real hardware.  The circuit
-    structure matches Section 5.4 but the MEoB step is a HamiltonianGate
-    (e^{-i M_ER^(k)}); full fault-tolerant execution requires a hardware
-    backend.
+quantum_step / quantum_simulate
+    Execute each ER bilinear step through the explicit block encoding in
+    core.block_encoding, with post-selection and per-step scalar rescaling.
+    This is a circuit-executed hybrid validation for small N.
+
+simulate_measurement / simulate_belief_measurement
+    Prepare a target belief state from a classical result and sample its
+    measurement statistics.  These paths model shot noise only; they do not
+    execute the MEoB combination circuit.
 """
 
 import numpy as np
@@ -67,25 +68,20 @@ class QER:
             M_ER = [[0,        B],
                     [B^dagger, 0]]
 
-        B^(k) is (N+2) x (N+2)^2, hence the rectangular block form
-        [[0, B], [B^H, 0]] has dimension (N+2) + (N+2)^2 = (N+2)(N+3).
-        The paper states the dilation size as (N+2)^2 x (N+2)^2; both
-        formulations require the same register size, ceil(log2((N+2)^2))
-        = ceil(log2((N+2)(N+3))) qubits — 5 for the benchmark N = 3,
-        matching the paper's qubit budget (Section 6.1: "dilated ER:
-        ceil(log2((3+2)^2)) = 5").
+        B^(k) is (N+2) x (N+2)^2.  The tensor product (N+2)^2 is the input
+        register; the Hermitian dilation adds an (N+2)-dimensional output
+        block, so the square dilation has dimension
+        (N+2) + (N+2)^2 = (N+2)(N+3).  The dilation register therefore uses
+        ceil(log2((N+2)(N+3))) qubits — 5 for the benchmark N = 3,
+        matching the paper's qubit budget (Section 6.1).
 
-        The data-dependent conflict normalisation factor K_{I(k+1)} is
-        incorporated through a block-encoding technique (Section 5.4): the
-        unnormalised bilinear map is computed first, and the factor K is then
-        folded into B so that B_enc = K * B encodes the *normalised* operator.
-        Block-encoding requires no matrix inversion: it embeds the operator
-        into a larger unitary to perform forward matrix-vector multiplication
-        (matrix function application in the MEoB framework).  The
-        post-selection success probability is O(1/kappa) after amplitude
-        amplification (Section 5.6), where the condition number depends on
-        the degree of conflict among the combined evidence
-        (see run_sensitivity.py).
+        This method belongs to the legacy structural Hamiltonian path used by
+        build_circuit().  It folds the conflict scalar K_{I(k+1)} into B only
+        to form that structural skeleton.  The circuit-executed block-encoding
+        path in core.block_encoding does not fold K into B: it applies K after
+        post-selection.  Hence the spectral condition number kappa_BE of B is
+        data-independent, and conflict enters through the post-selection
+        factor Gamma_acc rather than through kappa_BE (Section 5.4).
 
         Parameters
         ----------
@@ -107,12 +103,9 @@ class QER:
         lists the output as (c_1..c_N, c_hat_D, c_bar_D).  The bilinear
         content is identical.
 
-        The conflict normalisation K_{I(k+1)} corresponds to the
-        "additional block-encoding layer that rescales the operator"
-        described in Appendix A: the rescaled operator K * B encodes the
-        normalised map, with the O(kappa) multiplicative query overhead
-        already accounted for in the condition-number dependence of the
-        MEoB step.  Verified element-wise in
+        In this legacy structural path, K * B is used only to form the
+        Hamiltonian skeleton.  It is not used for the spectral or
+        condition-number claims.  Verified element-wise in
         tests/test_qer.py::TestHermitianMatrix::test_matches_appendix_a.
         """
         N = self.N
@@ -158,9 +151,9 @@ class QER:
         B[N + 1, col(N + 1, N)] = 1.0
         B[N + 1, col(N, N + 1)] = 1.0
 
-        # Block-encoding of the normalised operator: fold the conflict
-        # factor K into B (Section 5.4).  The condition number of the
-        # resulting dilation then reflects the evidence conflict.
+        # Legacy structural path: fold K into B only to form the Hamiltonian
+        # skeleton. The executed block-encoding path applies K after
+        # post-selection, and kappa_BE is data-independent.
         B = K * B
 
         # Hermitian dilation: M = [[0, B], [B^H, 0]] with rectangular blocks
@@ -288,11 +281,13 @@ class QER:
     def build_circuit(self, w: np.ndarray,
                       betas: np.ndarray) -> QuantumCircuit:
         """
-        Build the full iterative QER quantum circuit.
+        Build the structural QER circuit skeleton (depth analysis).
 
         Each combination step uses a HamiltonianGate (e^{-i M_ER^(k)})
         constructed from the Hermitian dilation of the ER synthesis matrix,
-        with the conflict normalisation K block-encoded into the matrix.
+        with the conflict normalisation K folded into the matrix.  This is a
+        structural/depth path; use ``core.block_encoding.ERBlockEncoding``
+        for an executed block-encoded ER step.
         The dilation has dimension (N+2)(N+3), so the gate acts on
         ceil(log2((N+2)(N+3))) qubits (5 qubits for the benchmark N = 3,
         matching the 27-qubit budget in Section 6.1).
@@ -388,15 +383,12 @@ class QER:
                              rng: np.random.Generator,
                              n_shots: int = 10**4) -> tuple[np.ndarray, float]:
         """
-        End-to-end Q-RIMER validation via the noiseless statevector simulator.
+        Target-state measurement via the noiseless statevector simulator.
 
-        Builds the QER output-state circuit for the ER combination result,
-        executes it on the Qiskit statevector simulator, and derives the
-        belief distribution from the Born-rule measurement statistics with
-        n_shots repetitions (Section 6.1).  This is the circuit-based path
-        used for correctness validation: the error metrics are computed
-        from the simulated measurement statistics, not from classical
-        perturbations of the reference values.
+        This method computes the ER result classically, prepares the target
+        belief state, and samples its measurement statistics.  It models
+        finite-shot readout but does not execute the MEoB/block-encoding
+        circuit; use ``quantum_simulate`` for the circuit-executed kernel.
 
         Parameters
         ----------
@@ -420,13 +412,11 @@ class QER:
                                     rng: np.random.Generator,
                                     n_shots: int = 10**4) -> tuple[np.ndarray, float]:
         """
-        Measure the Q-RIMER output belief state |β⟩ = Σ √β_j |j⟩ + √β_D |N+1⟩
+        Measure the target belief state |β⟩ = Σ √β_j |j⟩ + √β_D |N+1⟩
         on the noiseless statevector simulator with n_shots repetitions.
 
-        Used by the benchmark correctness study (RQ1): the output state is
-        prepared from the published ground-truth belief distribution
-        (Table III) and the error metrics are derived from the simulated
-        measurement statistics.
+        This models readout statistics of a state prepared from a known
+        belief distribution; it is not a circuit-executed MEoB inference.
         """
         N = len(beta)
         circ = QER.belief_state_circuit(beta, beta_D)
@@ -436,8 +426,11 @@ class QER:
     def build_target_state_circuit(self, w: np.ndarray,
                                    betas: np.ndarray) -> QuantumCircuit:
         """
-        Build a circuit that directly prepares the ER combination result
-        as a quantum state, for end-to-end verification.
+        Build a target-state circuit from the classical ER result.
+
+        This is a readout/state-preparation check, not the MEoB combination
+        circuit.  Use ``core.block_encoding.ERBlockEncoding`` for the
+        circuit-executed ER kernel.
 
         This circuit encodes the final belief distribution β as::
 
@@ -464,6 +457,57 @@ class QER:
         beta, beta_D = self.classical_simulate(w, betas)
         return self.belief_state_circuit(beta, beta_D)
 
+    def quantum_step(self, m_I: np.ndarray, m_next: np.ndarray,
+                     shots: int | None = None,
+                     rng: np.random.Generator | None = None,
+                     amplification_rounds: int = 1) -> dict:
+        """
+        Execute one ER combination step through the explicit block encoding.
+
+        This is a circuit-executed kernel for small N using the paper's
+        Hermitian dilation M = [[0, B], [B^H, 0]].  The block encoding
+        produces the normalised direction of B (m_I (x) m_next); the conflict
+        scalar K and the state norm are applied after the post-selected step.
+        """
+        from .block_encoding import HermitianERBlockEncoding
+
+        return HermitianERBlockEncoding(self.N).step(
+            m_I, m_next, shots=shots, rng=rng,
+            amplification_rounds=amplification_rounds
+        )
+
+    def quantum_simulate(self, w: np.ndarray, betas: np.ndarray,
+                         shots: int | None = None,
+                         rng: np.random.Generator | None = None,
+                         amplification_rounds: int = 1,
+                         discount: float = 0.0,
+                         delegate_threshold: float | None = None,
+                         coherent_k: bool = True,
+                         gate_level: bool = False) -> tuple:
+        """
+        Run the ER inference with a circuit-executed kernel per rule.
+
+        Each step is executed on the Qiskit statevector simulator through the
+        Hermitian-dilation block encoding.  With ``coherent_k=True`` the
+        state-dependent K is applied by an ancilla rotation without measuring
+        the belief state; otherwise K is applied as a post-selected scalar.
+        """
+        from .block_encoding import HermitianERBlockEncoding
+
+        encoder = HermitianERBlockEncoding(self.N)
+        if gate_level:
+            encoder.use_qiskit = True
+        if coherent_k and shots is None:
+            return encoder.coherent_simulate(
+                w, betas, amplification_rounds=amplification_rounds,
+                discount=discount, delegate_threshold=delegate_threshold
+            )
+        return encoder.simulate(
+            w, betas, shots=shots, rng=rng,
+            amplification_rounds=amplification_rounds,
+            discount=discount, delegate_threshold=delegate_threshold
+        )
+
     def estimate_depth(self) -> int:
         """
         Estimated circuit depth: O(L * polylog(1/epsilon)) per Section 5.4.
@@ -476,8 +520,9 @@ class QER:
         are typically 10-100x larger because each HamiltonianGate decomposes
         into O(4^n) basic gates during transpilation.
 
-        For paper Table 3 values, use experiments/measure_depth.py which
-        reports actual Qiskit transpiler output.
+        For the current structured-resource values, use
+        experiments/run_structured_resources.py.  measure_depth.py is a
+        legacy Qiskit-transpilation helper.
         """
         poly_log = max(1, int(np.ceil(np.log2(1.0 / self.epsilon)))) ** 2
         return self.L * poly_log

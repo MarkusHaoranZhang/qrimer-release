@@ -1,0 +1,69 @@
+{
+  "fig1": {
+    "categories": ["High (H)", "Medium (M)", "Low (L)", "Ignorance (D)"],
+    "classical":   [0.2685, 0.6772, 0.0543, 0.0],
+    "quantum":     [0.267,  0.678,  0.055,  0.0],
+    "quantum_err": [0.003,  0.003,  0.002,  0.001]
+  },
+  "fig2": {
+    "conditions": ["Full Q-RIMER", "Without QBRA", "Without ER\nmatrix", "Full pipeline", "Hybrid scheme"],
+    "eps":    [0.0031, 0.0025, 0.0472, 0.0053, 0.0091],
+    "std":    [0.0008, 0.0003, null,   null,   null],
+    "colors": ["#0F62FE", "#A6C8FF", "#DA1E28", "#0F62FE", "#DA1E28"]
+  },
+  "fig3": {
+    "fit_b": 2.14,
+    "fit_r2": 0.987,
+    "groups": [
+      {
+        "L": 50,
+        "marker": "s",
+        "color": "#A6C8FF",
+        "anchor_N":     [5],
+        "anchor_depth": [214],
+        "anchor_std":   [12]
+      },
+      {
+        "L": 100,
+        "marker": "^",
+        "color": "#4589FF",
+        "anchor_N":     [10],
+        "anchor_depth": [687],
+        "anchor_std":   [35]
+      },
+      {
+        "L": 200,
+        "marker": "o",
+        "color": "#0F62FE",
+        "anchor_N":     [5, 8, 10, 12, 15, 20, 25],
+        "anchor_depth": [101, 370, 607, 642, 1243, 2156, 4327],
+        "anchor_std":   [5, 19, 30, 32, 62, 108, 216]
+      },
+      {
+        "L": 200,
+        "marker": "x",
+        "color": "#0043CE",
+        "anchor_N":     [30, 50, 100],
+        "anchor_depth": [4621, 6847, 9763],
+        "anchor_std":   [231, 342, 488],
+        "note": "truncated scheme"
+      },
+      {
+        "L": 500,
+        "marker": "D",
+        "color": "#002D9C",
+        "anchor_N":     [50, 100],
+        "anchor_depth": [7215, 9918],
+        "anchor_std":   [361, 496],
+        "note": "truncated scheme"
+      }
+    ]
+  },
+  "fig4": {
+    "K_conf":    [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90],
+    "kappa":     [5.23, 11.75, 21.48, 34.67, 53.08, 86.33, 151.98, 283.48, 478.15],
+    "kappa_std": [0.31, 0.68, 1.25, 2.12, 3.41, 5.92, 11.23, 22.67, 41.50],
+    "eps_beta":  [0.00325, 0.00345, 0.00373, 0.00406, 0.00450, 0.00611, 0.00866, 0.01592, 0.02700],
+    "eps_std":   [0.00031, 0.00034, 0.00037, 0.00044, 0.00046, 0.00066, 0.00095, 0.00179, 0.00301]
+  }
+}

@@ -3,16 +3,17 @@ Extended studies: very large N and maritime safety assessment.
 Corresponds to Section 6.6 of the paper.
 
 This script:
-  1. Tests Q-RIMER at N=50 and N=100 using the truncated power-set
-     approximation (K_max=3), computing the actual truncation error
-     epsilon_beta against the full classical ER result.
+  1. Tests the ER-specific top-K singleton approximation at N=50 and N=100.
+     This approximation keeps the K largest singleton belief degrees and
+     renormalises them.  It is not a generic power-set/focal-set
+     representation; the ER state has only singleton and frame masses.
   2. Runs a synthetic maritime safety assessment (T=12, N=7, L=480)
      with safety-critical attribute weighting, classical timing, the
-     truncated scheme, and depth estimates.
+     top-K singleton scheme, and depth estimates.
 
-Paper results (Section 6.6):
-  N=50:  eps_beta ~ 0.031 (truncated power-set, K_max=3)
-  N=100: eps_beta ~ 0.041 (truncated power-set, K_max=3)
+Paper-reported large-N values (Section 6.6) are used only as reference:
+  N=50:  eps_beta ~ 0.031 (top-K singleton approximation)
+  N=100: eps_beta ~ 0.041 (top-K singleton approximation)
   Maritime: T=12, N=7, L=480, classical ~38 min, quantum ~2.2 s
             simulation, eps_beta ~ 0.019
 """
@@ -28,32 +29,31 @@ from core.qer import QER
 from core.rimer import BeliefRule, ClassicalRIMER
 from experiments.datasets import SyntheticDataGenerator
 
-# Truncation order of the power-set approximation (Section 6.6)
+# Keep the K largest singleton belief degrees (ER-specific approximation)
 K_MAX = 3
 
 
-def truncated_betas(betas: np.ndarray, k_max: int = K_MAX) -> np.ndarray:
+def truncate_top_k_singletons(betas: np.ndarray, k_max: int = K_MAX) -> np.ndarray:
     """
-    Truncated power-set approximation: for each rule, retain only the
-    k_max largest focal elements (belief degrees) and renormalise the
-    retained mass.  This mirrors the paper's scheme of "retaining only
-    focal sets of cardinality up to K_max = 3" for large-N instances.
+    ER-specific top-K singleton approximation.
+
+    For each rule, retain the k_max largest singleton belief degrees; the
+    mass removed from smaller singletons is left as residual ignorance
+    (it is not renormalised onto the retained grades).  This preserves the
+    ER frame mass and is not a power-set focal-set truncation.
     """
     truncated = np.zeros_like(betas)
     for k in range(betas.shape[0]):
         order = np.argsort(betas[k])[::-1][:k_max]
         truncated[k, order] = betas[k, order]
-        s = truncated[k].sum()
-        if s > 1e-12:
-            truncated[k] /= s
     return truncated
 
 
 def run_truncated_study(N: int, L: int, T: int = 4,
                         seed_offset: int = 0) -> dict:
     """
-    Compute the full classical ER result and the K_max-truncated result,
-    returning the truncation error epsilon_beta.
+    Compute the full classical ER result and the top-K singleton result,
+    returning the approximation error epsilon_beta.
     """
     gen = SyntheticDataGenerator(N, L, T, seed=RANDOM_SEED + seed_offset,
                                  gamma=0.5, incomplete_scale=0.9)
@@ -77,10 +77,10 @@ def run_truncated_study(N: int, L: int, T: int = 4,
     # Full exact classical ER combination
     beta_full, beta_D_full = rimer.er_combine(w, betas)
 
-    # Truncated scheme (K_max focal elements per rule)
+    # Top-K singleton approximation
     qer = QER(N=N, L=L, kappa_max=50.0)
     beta_trunc, beta_D_trunc = qer.classical_simulate(
-        w, truncated_betas(betas, k_max=K_MAX))
+        w, truncate_top_k_singletons(betas, k_max=K_MAX))
 
     eps = belief_distribution_error(beta_trunc, beta_full)
     return {
@@ -93,11 +93,11 @@ def run_truncated_study(N: int, L: int, T: int = 4,
 
 def large_N_study():
     """
-    Test Q-RIMER at N=50 and N=100 with the truncated power-set scheme.
+    Test the ER-specific top-K singleton approximation at N=50 and N=100.
     """
     print("[Very large N study]")
     print(f"  {'N':>4}  {'L':>4}  {'QER depth':>10}  {'QBRA depth':>11}  "
-          f"{'eps_beta (K_max=3)':>18}")
+          f"{'eps_beta (top-3)':>18}")
 
     for i, (N, L) in enumerate([(50, 200), (100, 500)]):
         T = 4
@@ -109,15 +109,14 @@ def large_N_study():
         res = run_truncated_study(N, L, T=T, seed_offset=800 + i)
         print(f"  {N:>4}  {L:>4}  {d_qer:>10}  {d_qbra:>11}  "
               f"{res['eps_beta']:>18.4f}")
-        print(f"        truncation: beta_D full={res['beta_D_full']:.4f}  "
-              f"trunc={res['beta_D_trunc']:.4f}")
+        print(f"        top-K: beta_D full={res['beta_D_full']:.4f}  "
+              f"approx={res['beta_D_trunc']:.4f}")
 
-    print("  Paper targets: N=50: eps_beta ~ 0.031;  N=100: eps_beta ~ 0.041")
-    print("  (The truncation error is the price paid for extending the")
+    print("  Paper-reported targets: N=50: ~0.031; N=100: ~0.041")
+    print("  (The top-K singleton error is the price paid for extending the")
     print("   feasible problem size beyond the simulator capacity, Section 6.6.")
-    print("   Per Section 6.7, the truncated scheme is an exploratory approximation")
-    print("   whose relationship with the full Q-RIMER framework requires further")
-    print("   investigation on larger-scale quantum resources.)")
+    print("   It is an ER-specific approximation, not a full power-set")
+    print("   representation; large-N results should be interpreted accordingly.)")
 
 
 def maritime_scenario():
@@ -163,9 +162,9 @@ def maritime_scenario():
     beta_c, beta_D_c = rimer.er_combine(w, betas)
     classical_time = time.perf_counter() - t0
 
-    # QER truncated scheme (K_max=3) vs full classical result
+    # Top-K singleton approximation vs full classical result
     qer = QER(N=N, L=L, kappa_max=50.0)
-    beta_q, beta_D_q = qer.classical_simulate(w, truncated_betas(betas))
+    beta_q, beta_D_q = qer.classical_simulate(w, truncate_top_k_singletons(betas))
     eps = belief_distribution_error(beta_q, beta_c)
 
     # Depth estimates
@@ -176,7 +175,7 @@ def maritime_scenario():
           f"(safety-critical attrs: {safety_critical_attrs})")
     print(f"  Classical time (local NumPy): {classical_time*1000:.1f} ms")
     print(f"  Estimated quantum depth     : {total_depth}")
-    print(f"  Truncated-scheme eps_beta   : {eps:.4f}")
+    print(f"  Top-K eps_beta              : {eps:.4f}")
     print(f"  beta_c[:3] = [{beta_c[0]:.4f}, {beta_c[1]:.4f}, {beta_c[2]:.4f}]")
     print(f"  beta_D = {beta_D_c:.4f}")
     print("  Paper targets: classical ~38 min (their full workload), quantum")

@@ -35,6 +35,9 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.4.0",
 ]
+gpu = [
+    "torch>=2.0",
+]
 
 [tool.setuptools]
 py-modules = ["config"]

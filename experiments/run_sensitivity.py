@@ -1,6 +1,10 @@
 """
-Sensitivity analysis (RQ4): condition number, noise robustness, sparsity.
-Corresponds to Section 6.5 of the paper.
+Legacy sensitivity exploration (historical; not used for current claims).
+
+The current manuscript treats kappa_BE as data-independent and attributes
+conflict dependence to the post-selection factor Gamma_acc. Use
+run_conflict_scan.py for the conflict scan and
+run_blockencoded_noise_large_n.py for the noise study.
 
 This script computes:
   1. Condition number kappa vs conflict coefficient K_conf.  The

@@ -1,0 +1,92 @@
+{
+  "core/block_encoding.py": {
+    "exists": true,
+    "sha256": "221fce06b9f652ea8c1158b5b43351f1531cca10cda0ec0c5de9912c5afe7a77",
+    "bytes": 26151
+  },
+  "core/qbra_arithmetic.py": {
+    "exists": true,
+    "sha256": "5a4aff8290f4931a6592c06e305350a2d8baade98a59828270e7852961161fc4",
+    "bytes": 17688
+  },
+  "core/qbra_combined.py": {
+    "exists": true,
+    "sha256": "93b47bdb29dc6cad09186f3be43a1728dcda33909f059b17a767642e263366f4",
+    "bytes": 2734
+  },
+  "core/qer.py": {
+    "exists": true,
+    "sha256": "257dbdb4ecd90a7ace70096e4ec3b03bc9e1ce32600086524e7f5c886598af7f",
+    "bytes": 22296
+  },
+  "core/structured_qer.py": {
+    "exists": true,
+    "sha256": "33fc012fc89563a4b7c9e2de5e15f46c6a5102e4fcbf7db30b11ce4bf5feac8c",
+    "bytes": 3882
+  },
+  "experiments/run_qbra_benchmark_t4.py": {
+    "exists": true,
+    "sha256": "ca7479ac0e52b4a35be4db5aa00b7f4e316c5981b601bf60e52c4c725be18c79",
+    "bytes": 2320
+  },
+  "experiments/run_backfill_report.py": {
+    "exists": true,
+    "sha256": "41bf2a1153eccb38176e9de9c42e8eabaf17bb9cc3169a962fd4b659340c152b",
+    "bytes": 3682
+  },
+  "experiments/run_table4_backfill.py": {
+    "exists": true,
+    "sha256": "c69f37700badf81ad6eafa9760291c81d382f8e4632fd95b7164cc9d5cde8a9e",
+    "bytes": 2052
+  },
+  "experiments/run_section67_backfill.py": {
+    "exists": true,
+    "sha256": "405320f386d2c11cd3b50b5050ca38f85e3e831a92837728d1e1b1be81886d15",
+    "bytes": 1638
+  },
+  "experiments/run_final_consistency.py": {
+    "exists": true,
+    "sha256": "4ebec9e4afc5a52326085c1459fee9de34cdafa32a89001e2c6f80549247c6df",
+    "bytes": 3530
+  },
+  "outputs/tables/table3_structured.json": {
+    "exists": true,
+    "sha256": "342667b07322043b7c4296bf41920b661524c68557a127b7e413c549e9bcf8f2",
+    "bytes": 2386
+  },
+  "outputs/tables/table10_generated.json": {
+    "exists": true,
+    "sha256": "e040a45261e2cb41b2e216b72d9fbb8081e6693b1ec7b863f18e6064914b341e",
+    "bytes": 2595
+  },
+  "outputs/manuscript/table2_generated.json": {
+    "exists": true,
+    "sha256": "f13b7c5790db1c164e4c1ff5f5a7772384f9f9c9c1d082d705bf0083bcf38266",
+    "bytes": 1152
+  },
+  "outputs/manuscript/table4_generated.json": {
+    "exists": true,
+    "sha256": "f7efeb2875a9817519313b7c056ba7c142288c473cd8dcf3bf965e4c0f380a26",
+    "bytes": 754
+  },
+  "outputs/manuscript/table5_generated.json": {
+    "exists": true,
+    "sha256": "bc245e4c0d73bd40142bc66073edf5eb6552ad26b69ea44859b6c78b3ecff800",
+    "bytes": 2409
+  },
+  "outputs/manuscript/section67_generated.json": {
+    "exists": true,
+    "sha256": "49507b13af745dcdb76434edfedd8c7779f76a9f8f1edb1e8c3e651b3192e4ec",
+    "bytes": 566
+  },
+  "outputs/manuscript/consistency_report.md": {
+    "exists": true,
+    "sha256": "f8f3977d83995b2cf4b6f0d46deae9c32d6f7d28db8c547acf8fd54fc491a38e",
+    "bytes": 2616
+  },
+  "outputs/logs/environment_manifest.json": {
+    "exists": true,
+    "sha256": "8c7db2e3dcc8c4d7c8558c4332f84cd61b0bf0a21de61a4d24650d73026771c9",
+    "bytes": 394
+  }
+}

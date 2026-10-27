@@ -24,6 +24,7 @@ env/
 
 # Generated outputs (reproducible via experiment scripts)
 outputs/figures/*.pdf
+outputs/figures/*.png
 outputs/logs/*.npz
 outputs/tables/*
 

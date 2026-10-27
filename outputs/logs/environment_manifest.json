@@ -1,0 +1,17 @@
+{
+  "python": "3.13.9",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "qiskit": "2.3.0",
+  "qiskit_aer": "0.17.2",
+  "numpy": "2.3.5",
+  "scipy": "1.17.1",
+  "random_seed": 42,
+  "shots": 10000,
+  "noise": {
+    "model": "IBM Falcon depolarizing/density-matrix operator model",
+    "single_qubit_error": 0.001,
+    "two_qubit_error": 0.01,
+    "T1_us": 100,
+    "T2_us": 80
+  }
+}

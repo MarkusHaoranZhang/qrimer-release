@@ -34,6 +34,9 @@ def rank_preservation(beta_q: np.ndarray, beta_c: np.ndarray) -> float:
     float
         tau in [-1, 1]; 1.0 means perfect rank preservation.
     """
+    # Remove floating-point dust so exact ties are treated as ties.
+    beta_q = np.where(np.abs(beta_q) < 1e-9, 0.0, beta_q)
+    beta_c = np.where(np.abs(beta_c) < 1e-9, 0.0, beta_c)
     tau, _ = kendalltau(beta_q, beta_c)
     return float(tau)
 

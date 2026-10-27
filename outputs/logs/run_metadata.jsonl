@@ -1,0 +1,1 @@
+{"name": "qbra_benchmark_t4", "timestamp": 1793027674.6408653, "seed": 42, "shots": 10000, "noise": 0.01, "metrics": {"activation_error": 0.07723717181815107, "qer_epsilon": 0.028232791916401746, "shot_epsilon": 0.023778547480865986, "noise_epsilon": 0.09119600801473557}, "n_qubits": 7, "steps": 35}

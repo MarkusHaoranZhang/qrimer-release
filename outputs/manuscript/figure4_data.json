@@ -1,0 +1,16 @@
+{
+  "conditions": [
+    "Full Q-RIMER",
+    "Without QBRA",
+    "Without ER matrix",
+    "Full pipeline",
+    "Hybrid scheme"
+  ],
+  "values": [
+    0.004911314749272393,
+    0.00489311030701794,
+    0.6402993920150586,
+    0.006364080762755643,
+    0.009840272656060798
+  ]
+}

@@ -252,12 +252,13 @@ class TestCircuitBuilding:
 
 class TestStatevectorEquivalence:
     """
-    Verify that the quantum circuit's statevector output, when interpreted
-    as a probability distribution, is consistent with classical_simulate.
+    Verify the target-state readout and the ER synthesis matrix.
 
-    This is the critical test that validates the paper's core claim:
-    the quantum circuit structure (HamiltonianGate-based MEoB) encodes
-    the same mathematical operation as the classical ER combination.
+    These tests check that the target belief state, prepared from the
+    classical result, has the expected Born-rule probabilities, and that
+    the Hermitian dilation encodes the bilinear ER map.  They do not
+    execute a full MEoB/block-encoded inference circuit; that is covered by
+    tests/test_block_encoding.py.
     """
 
     def test_single_step_hermitian_encodes_er(self):

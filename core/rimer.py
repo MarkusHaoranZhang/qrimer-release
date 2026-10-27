@@ -255,16 +255,18 @@ def create_graphite_membership_functions() -> list[Callable]:
     Input values are in [0, 1] after normalization.
     """
     def make_membership(val: float) -> dict[int, float]:
-        # H (key=2): trapezoidal [0.6, 0.8, 1.0, 1.0]
-        # M (key=1): trapezoidal [0.2, 0.4, 0.6, 0.8]
-        # L (key=0): trapezoidal [0.0, 0.0, 0.2, 0.4]
-        high   = trapezoidal_membership(val, 0.6, 0.8, 1.0, 1.0)
-        medium = trapezoidal_membership(val, 0.2, 0.4, 0.6, 0.8)
-        low    = trapezoidal_membership(val, 0.0, 0.0, 0.2, 0.4)
-        total  = high + medium + low
-        if total > 1e-12:
-            return {2: high / total, 1: medium / total, 0: low / total}
-        return {2: 0.0, 1: 0.0, 0: 0.0}
+        # Equivalence-rule transformation used in the RIMER paper:
+        # L=0, M=0.5, H=1, with linear interpolation between anchors.
+        v = min(max(float(val), 0.0), 1.0)
+        if v <= 0.5:
+            low = 1.0 - 2.0 * v
+            medium = 2.0 * v
+            high = 0.0
+        else:
+            low = 0.0
+            medium = 2.0 * (1.0 - v)
+            high = 2.0 * v - 1.0
+        return {2: high, 1: medium, 0: low}
 
     return [make_membership] * 4
 

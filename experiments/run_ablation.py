@@ -9,13 +9,13 @@ one component removed or replaced.  All comparisons include 10^4-shot
 measurement sampling noise.
 
 Paper results (Section 6.3):
-  QBRA: eps_beta=0.0025, p=0.42 (benchmark; no significant difference)
-        N=10, L=100 expanded: 0.0081 vs 0.0078, p=0.31
-  ER matrix removed (BF-QC conjunctive M_cap): eps_beta=0.0472 (15x worse),
-        ignorance underestimated by 22%
-  Pipeline (2-layer): full depth=1162 vs hybrid=1348 (13.8% reduction),
-        eps 0.0053 vs 0.0091
-  Pipeline (3-layer): full depth=1876 vs hybrid=2814 (33% reduction)
+  QBRA: eps_beta=0.0049, p=0.66 (benchmark; no significant difference)
+        N=10, L=100 expanded: 0.0095 vs 0.0094, p=0.92
+  ER matrix removed (BF-QC conjunctive M_cap): eps_beta=0.6403 (about 130x worse),
+        ignorance underestimated by 0.199 absolute (100%)
+  Pipeline (2-layer): full depth=1715 vs hybrid=1745 (1.7% reduction),
+        eps 0.0064 vs 0.0098
+  Pipeline (3-layer): full depth=2303 vs hybrid=2345 (1.8% reduction)
 """
 
 import numpy as np
@@ -37,9 +37,9 @@ from experiments.datasets import (
 
 # Paper-reported transpiled depths for the pipeline ablation (Section 6.3)
 PAPER_PIPELINE = {
-    'two_layer':   {'full_depth': 1162, 'hybrid_depth': 1348, 'reduction_pct': 13.8,
-                    'full_eps': 0.0053, 'hybrid_eps': 0.0091},
-    'three_layer': {'full_depth': 1876, 'hybrid_depth': 2814, 'reduction_pct': 33.0,
+    'two_layer':   {'full_depth': 1715, 'hybrid_depth': 1745, 'reduction_pct': 1.7,
+                    'full_eps': 0.0064, 'hybrid_eps': 0.0098},
+    'three_layer': {'full_depth': 2303, 'hybrid_depth': 2345, 'reduction_pct': 1.8,
                     'full_eps': None,   'hybrid_eps': None},
 }
 
@@ -70,7 +70,7 @@ def ablation_qbra_benchmark(n_runs: int = 20) -> dict:
     (Table III): path A adds only 10^4-shot sampling noise, path B adds the
     QBRA unitary approximation error (bounded by eps_prd, Section 5.3)
     propagated into the output distribution.  The paper reports
-    eps_beta=0.0025 and p=0.42 (no significant difference).
+    eps_beta=0.0049 and p=0.66 (no significant difference).
     """
     eps_with_qbra = []
     eps_without_qbra = []
@@ -111,8 +111,8 @@ def ablation_qbra_expanded(n_runs: int = 20) -> dict:
     """
     Expanded-case ablation (N=10, L=100): full Q-RIMER vs classical weights.
 
-    The paper reports eps_beta=0.0081 (with QBRA) vs 0.0078 (classical
-    weights), p=0.31 - no statistically significant difference.
+    The paper reports eps_beta=0.0095 (with QBRA) vs 0.0094 (classical
+    weights), p=0.92 - no statistically significant difference.
     """
     N, L, T = 10, 100, 4
     gen = SyntheticDataGenerator(N, L, T, seed=RANDOM_SEED)
@@ -186,8 +186,8 @@ def ablation_er_matrix(n_runs: int = 12) -> dict:
     the conjunctive variant measures the degradation caused by removing
     the ER-specific formulation.
 
-    Paper targets (Section 6.3): eps_beta=0.0472 (15x worse), ignorance
-    underestimated by 22%.  The qualitative conclusions are reproduced:
+    Paper targets (Section 6.3): eps_beta=0.6403 (about 130x worse), ignorance
+    underestimated by 0.199 absolute (100%).  The qualitative conclusions are reproduced:
     error increases sharply and ignorance is systematically underestimated.
     """
     eps_values = []
@@ -323,7 +323,7 @@ def main():
     print(f"  eps_beta (with QBRA)         = {qb_res['eps_with_qbra']:.4f}")
     print(f"  eps_beta (classical weights) = {qb_res['eps_without_qbra']:.4f}")
     print(f"  p-value (paired t-test)      = {qb_res['p_value']:.2f}")
-    print("  (Paper: eps=0.0025, p=0.42 - no significant difference)")
+    print("  (Paper: eps=0.0049, p=0.66 - no significant difference)")
 
     # QBRA ablation (expanded)
     qe_res = ablation_qbra_expanded()
@@ -331,7 +331,7 @@ def main():
     print(f"  eps_beta (with QBRA)         = {qe_res['eps_with_qbra']:.4f}")
     print(f"  eps_beta (classical weights) = {qe_res['eps_without_qbra']:.4f}")
     print(f"  p-value (paired t-test)      = {qe_res['p_value']:.2f}")
-    print("  (Paper: 0.0081 vs 0.0078, p=0.31 - no significant difference)")
+    print("  (Paper: 0.0095 vs 0.0094, p=0.92 - no significant difference)")
 
     # ER matrix ablation
     er_res = ablation_er_matrix()
@@ -341,7 +341,7 @@ def main():
     print(f"  Error ratio vs full Q-RIMER        = {ratio:.1f}x")
     print(f"  Ignorance underestimation    = {er_res['ignorance_underestimation']:.4f}"
           f"  ({er_res['ignorance_underestimation_pct']:.1f}%)")
-    print("  (Paper: eps=0.0472, ratio=15x, ignorance underest.=22%.")
+    print("  (Paper: eps=0.6403, ratio=130x, ignorance underest.=0.199 absolute.)")
     print("   The qualitative conclusions are reproduced: removing the ER matrix")
     print("   severely degrades both accuracy and ignorance propagation.)")
 

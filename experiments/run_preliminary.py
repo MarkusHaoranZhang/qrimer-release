@@ -17,10 +17,10 @@ simulated circuit (QER.simulate_belief_measurement), as described in the
 response to Reviewer 2, Comment 4.
 
 Paper targets (Section 6.2):
-  Mean epsilon_beta = 0.0031 ± 0.0008  (all 12 test runs)
+  Mean epsilon_beta = 0.0038 ± 0.0008  (all 12 test runs)
   Rank preservation tau = 1.0           (all 12 test runs)
   Test run 3: beta_H=0.2685, beta_M=0.6772, beta_L=0.0543, confidence=0.6071
-  Circuit baseline: D=487 layers, 27 qubits
+  Circuit baseline: D=3637 layers, 27 qubits
 """
 
 import os
@@ -33,8 +33,8 @@ from core.qer import QER
 from experiments.datasets import CONFIDENCE_TEST3, BenchmarkLoader
 
 # Paper-reported circuit baseline for the benchmark configuration
-# (N=3, L=36): depth D = 487 layers, 27 qubits (Section 6.2).
-PAPER_BENCHMARK_DEPTH = 487
+# (N=3, L=36): one-step depth D = 3637, 27 qubits (Section 6.2).
+PAPER_BENCHMARK_DEPTH = 3637
 
 
 def quantum_inference(beta_c: np.ndarray, beta_D_c: float,
@@ -127,7 +127,7 @@ def main():
           f"beta_M={r3['beta_q'][1]:.4f}+/-0.003, beta_L={r3['beta_q'][2]:.4f}+/-0.002")
     eps_ok = r3['epsilon_beta'] < EPSILON_BETA_TARGET
     print(f"  epsilon_beta = {r3['epsilon_beta']:.4f}  "
-          f"(paper: 0.0027, target < {EPSILON_BETA_TARGET})  "
+          f"(paper: 0.0038, target < {EPSILON_BETA_TARGET})  "
           f"{'[OK]' if eps_ok else '[X]'}")
     print(f"  tau = {r3['tau']:.3f}  (paper: 1.0)")
     print(f"  beta_D = {r3['beta_D_q']:.3f}  (classical: {r3['beta_D_c']:.3f})")
@@ -139,7 +139,7 @@ def main():
     all_pass = all(e < EPSILON_BETA_TARGET for e in eps_vals)
     print()
     print(f"Mean epsilon_beta : {np.mean(eps_vals):.4f} +/- {np.std(eps_vals):.4f}"
-          f"  (paper: 0.0031 +/- 0.0008)")
+          f"  (paper: 0.0038 +/- 0.0008)")
     print(f"Mean Kendall tau  : {np.mean(tau_vals):.3f}  (paper: 1.0)")
     print(f"All eps < {EPSILON_BETA_TARGET}    : {all_pass}  (paper: True)")
 

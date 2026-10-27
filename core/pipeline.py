@@ -130,6 +130,75 @@ class QuantumPipeline:
 
         return beta, beta_D
 
+    def quantum_simulate(
+        self,
+        input_dists: list[dict[int, float]],
+        rules_per_layer: list[tuple[np.ndarray, np.ndarray, np.ndarray]],
+        shots: int | None = None,
+        rng: np.random.Generator | None = None,
+        coherent_k: bool = False,
+    ) -> tuple[np.ndarray, float, list[dict]]:
+        """
+        Run the hierarchical pipeline with a block-encoded QER kernel per layer.
+
+        Rule activation is computed classically per layer; the ER combination
+        of each layer is executed through the Hermitian-dilation block
+        encoding.  Intermediate belief vectors are passed directly between
+        layers (no measurement), but the scalar K/norm bookkeeping remains
+        classical.  This is the executable hierarchical path used by
+        ``experiments/run_hierarchical_quantum.py``.
+        """
+        from .rimer import BeliefRule, ClassicalRIMER
+
+        current_dists = input_dists
+        layer_info = []
+
+        for m, ((qbrb, qbra, qer), (betas, rule_weights, attr_weights)) in \
+                enumerate(zip(self.modules, rules_per_layer)):
+            cfg = self.layers[m]
+            N, L, T = cfg['N'], cfg['L'], cfg['T']
+
+            rimer = ClassicalRIMER(N=N, L=L, T=T)
+            for k in range(L):
+                if m == 0:
+                    ant = [int(k % (max(current_dists[i].keys()) + 1))
+                           for i in range(T)]
+                else:
+                    ant = [int(k % (max(current_dists[0].keys()) + 1))]
+                rimer.add_rule(BeliefRule(
+                    antecedent=ant,
+                    consequent=betas[k],
+                    rule_weight=float(rule_weights[k]),
+                    attribute_weights=attr_weights[k],
+                ))
+
+            w = rimer.rule_activation(current_dists)
+            beta, beta_D, info = qer.quantum_simulate(
+                w, betas, shots=shots, rng=rng, coherent_k=coherent_k
+            )
+            current_dists = [{(N - 1 - j): float(beta[j]) for j in range(N)}]
+            info = dict(info)
+            info['layer'] = m
+            layer_info.append(info)
+
+        return beta, beta_D, layer_info
+
+    def coherent_simulate(
+        self,
+        input_dists: list[dict[int, float]],
+        rules_per_layer: list[tuple[np.ndarray, np.ndarray, np.ndarray]],
+    ) -> tuple[np.ndarray, float, list[dict]]:
+        """
+        Statevector handoff between layers with no intermediate measurement.
+
+        The belief state is not measured at layer boundaries and K is applied
+        through the ancilla-rotation path.  This is the executable coherent
+        path used for hierarchical validation.
+        """
+        return self.quantum_simulate(
+            input_dists, rules_per_layer, shots=None, coherent_k=True
+        )
+
     # ------------------------------------------------------------------
     # Quantum circuit construction (register skeleton)
     # ------------------------------------------------------------------
